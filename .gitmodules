@@ -1,3 +1,6 @@
 [submodule "projects/Uni3C"]
 	path = projects/Uni3C
 	url = https://github.com/nervouswizard/Uni3C
+[submodule "projects/Marigold-DC"]
+	path = projects/Marigold-DC
+	url = https://github.com/nervouswizard/Marigold-DC

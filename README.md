@@ -39,3 +39,4 @@ git submodule update --remote projects/Uni3C
 | 名稱 | 路徑 | 來源 |
 |------|------|------|
 | Uni3C | `projects/Uni3C` | https://github.com/nervouswizard/Uni3C |
+| Marigold-DC | `projects/Marigold-DC` | https://github.com/nervouswizard/Marigold-DC |
