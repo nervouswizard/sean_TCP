@@ -1,0 +1,3 @@
+[submodule "projects/Uni3C"]
+	path = projects/Uni3C
+	url = https://github.com/nervouswizard/Uni3C
