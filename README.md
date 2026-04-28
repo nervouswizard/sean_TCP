@@ -10,9 +10,10 @@
 │   ├── Uni3C/                 # https://github.com/nervouswizard/Uni3C
 │   └── Marigold-DC/           # https://github.com/nervouswizard/Marigold-DC
 ├── src/
-│   └── hand_adjustment/       # 深度圖手動調整工具組
+│   ├── depth_hints/           # 產生 Marigold-DC 稀疏深度參考輸入
+│   │   └── point_selector.py  # 互動式點選與深度值標注工具
+│   └── visualization/         # 輸入與輸出結果確認工具
 │       ├── draw_npy.py        # 深度圖統計與視覺化
-│       ├── point_selector.py  # 互動式點選與深度值標注工具
 │       └── visualize_points.py# 已儲存點位的視覺化
 ├── comfyui/
 │   └── workflows/             # ComfyUI workflow (.json)
@@ -42,22 +43,28 @@ git submodule update --remote projects/Uni3C
 
 ## 工具說明
 
-### `src/hand_adjustment/` — 深度圖手動調整工具組
+### `src/depth_hints/` — Marigold-DC 稀疏深度參考輸入
 
-深度估測模型在手部區域常有偏差，此工具組用於手動修正深度圖。
+手動指定影像中特定位置的深度值，產生稀疏深度 hint，作為 Marigold-DC 的深度條件輸入。
 
 | 腳本 | 功能 |
 |------|------|
-| `draw_npy.py` | 載入 `.npy` 深度圖，輸出統計資訊（有效點數、最大/最小/平均/中位數/標準差），並生成直方圖、散點圖、黑底版本與疊加原圖等四張視覺化 PNG |
-| `point_selector.py` | 互動式 GUI：在原始影像上點擊選取控制點，透過滑桿為每個點指定深度值 (0–1)，支援儲存/復原/清除，輸出 `.json`（座標＋數值）與 `.npy` 遮罩 |
+| `point_selector.py` | 互動式 GUI：在原始影像上點擊選取控制點，透過滑桿為每個點指定深度值 (0–1)，支援儲存/復原/清除，輸出 `.json`（座標＋數值）與 `.npy` 稀疏深度遮罩 |
+
+### `src/visualization/` — 結果確認工具
+
+| 腳本 | 功能 |
+|------|------|
 | `visualize_points.py` | 讀取 `point_selector.py` 輸出的 JSON，將控制點以色彩標記疊回原圖，支援兩種 JSON 格式（含/不含深度值） |
+| `draw_npy.py` | 載入 `.npy` 深度圖，輸出統計資訊（有效點數、最大/最小/平均/中位數/標準差），並生成直方圖、散點圖、黑底版本與疊加原圖等四張視覺化 PNG |
 
 **典型工作流程：**
 ```
 原始影像
-  → point_selector.py   # 手動點選控制點並賦予深度值 → *_points.json + *_mask.npy
-  → visualize_points.py # 確認點位標注是否正確
-  → draw_npy.py         # 確認最終深度圖分佈與統計
+  → depth_hints/point_selector.py    # 手動指定稀疏深度參考點 → *_points.json + *_mask.npy
+  → visualization/visualize_points.py # 確認點位標注是否正確
+  → (Marigold-DC 推論)
+  → visualization/draw_npy.py         # 確認輸出深度圖分佈與統計
 ```
 
 ---
