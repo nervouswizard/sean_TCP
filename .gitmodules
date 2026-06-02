@@ -4,3 +4,6 @@
 [submodule "projects/Marigold-DC"]
 	path = projects/Marigold-DC
 	url = https://github.com/nervouswizard/Marigold-DC
+[submodule "projects/Tcp-paper"]
+	path = projects/Tcp-paper
+	url = https://github.com/nervouswizard/Tcp-paper

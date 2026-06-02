@@ -127,7 +127,8 @@ PCDController 將點雲渲染的參考幀注入視訊擴散模型，填補視角
 .
 ├── projects/                  # 各子專案 (git submodules)
 │   ├── Uni3C/                 # https://github.com/nervouswizard/Uni3C
-│   └── Marigold-DC/           # https://github.com/nervouswizard/Marigold-DC
+│   ├── Marigold-DC/           # https://github.com/nervouswizard/Marigold-DC
+│   └── Tcp-paper/             # https://github.com/nervouswizard/Tcp-paper
 ├── src/
 │   ├── depth_hints/           # 產生 Marigold-DC 稀疏深度參考輸入
 │   │   └── point_selector.py  # 互動式點選與深度值標注工具
@@ -196,3 +197,4 @@ git submodule update --remote projects/Uni3C
 |------|------|------|
 | Uni3C | `projects/Uni3C` | https://github.com/nervouswizard/Uni3C |
 | Marigold-DC | `projects/Marigold-DC` | https://github.com/nervouswizard/Marigold-DC |
+| Tcp-paper | `projects/Tcp-paper` | https://github.com/nervouswizard/Tcp-paper |
