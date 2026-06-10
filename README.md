@@ -62,7 +62,7 @@ python src/depth_hints/point_selector.py
 ```
 
 - 在圖片上點擊選取控制點（最多 20 個顯示於右側面板）
-- 透過滑桿設定每個點的深度值（0 = 最近，1 = 最遠）
+- 透過滑桿設定每個點的深度值（0 = 最遠，1 = 最近）
 - 按「儲存」輸出 `*_points.json`（座標＋深度值）與 `*_mask.npy`（稀疏遮罩）
 - 用 `src/visualization/visualize_points.py` 確認標注位置正確
 
