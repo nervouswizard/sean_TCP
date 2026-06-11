@@ -368,7 +368,8 @@ class PointSelector:
 
 if __name__ == "__main__":
     # 設置圖片路徑
-    image_path = 'ComfyUI_temp_sgucl_00002_.png'  # 更改為你的圖片路徑
+    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    image_path = os.path.join(project_root, 'data', 'DA2', 'rosemaling.png')
     
     # 創建並運行點選器
     selector = PointSelector(image_path)
