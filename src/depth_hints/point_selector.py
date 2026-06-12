@@ -1,9 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_agg import FigureCanvasAgg
 from PIL import Image
 import matplotlib.patches as patches
 import json
 import os
+from datetime import datetime
 from matplotlib.widgets import Button, Slider, TextBox
 import matplotlib as mpl
 
@@ -285,9 +288,13 @@ class PointSelector:
             self.save_points(event)
     
     def save_points(self, event):
-        # 生成文件名 (使用原圖檔名加上_points.json)
         base_name = os.path.splitext(os.path.basename(self.image_path))[0]
-        output_file = f"{base_name}_points.json"
+        project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        date_str = datetime.now().strftime("%m%d%H%M%S")
+        out_dir = os.path.join(project_root, "data", "point_hint", base_name, f"date{date_str}")
+        os.makedirs(out_dir, exist_ok=True)
+
+        output_file = os.path.join(out_dir, f"{base_name}_points.json")
         mid_val = 0.5 * (self.min_value + self.max_value)
 
         # 創建包含座標和數值的完整數據
@@ -313,7 +320,7 @@ class PointSelector:
                 mask[y, x] = value
 
         # 儲存矩陣
-        mask_file = f"{base_name}_mask.npy"
+        mask_file = os.path.join(out_dir, f"{base_name}_mask.npy")
         np.save(mask_file, mask)
 
         h, w = self.image.shape[:2]
@@ -325,7 +332,9 @@ class PointSelector:
         fig_h = max(4, h / 100)
 
         # 儲存圖片1：全黑背景 + 熱力圖點位 + colorbar
-        fig1, ax1 = plt.subplots(figsize=(fig_w, fig_h))
+        fig1 = Figure(figsize=(fig_w, fig_h))
+        FigureCanvasAgg(fig1)
+        ax1 = fig1.add_subplot(111)
         ax1.set_facecolor('black')
         fig1.patch.set_facecolor('black')
         ax1.set_xlim(0, w)
@@ -341,12 +350,13 @@ class PointSelector:
             cbar1.ax.yaxis.set_tick_params(color='white')
             plt.setp(cbar1.ax.yaxis.get_ticklabels(), color='white')
             cbar1.outline.set_edgecolor('white')
-        black_file = f"{base_name}_points_black.png"
+        black_file = os.path.join(out_dir, f"{base_name}_points_black.png")
         fig1.savefig(black_file, bbox_inches='tight', facecolor='black', dpi=150)
-        plt.close(fig1)
 
         # 儲存圖片2：原始圖片 + 熱力圖點位 + colorbar
-        fig2, ax2 = plt.subplots(figsize=(fig_w, fig_h))
+        fig2 = Figure(figsize=(fig_w, fig_h))
+        FigureCanvasAgg(fig2)
+        ax2 = fig2.add_subplot(111)
         ax2.imshow(np.array(Image.open(self.image_path).convert('RGB')))
         ax2.set_xlim(0, w)
         ax2.set_ylim(h, 0)
@@ -357,9 +367,8 @@ class PointSelector:
                               s=80, zorder=5, edgecolors='white', linewidths=0.5)
             cbar2 = fig2.colorbar(sc2, ax=ax2, fraction=0.046, pad=0.04)
             cbar2.set_label('深度值')
-        overlay_file = f"{base_name}_points_overlay.png"
+        overlay_file = os.path.join(out_dir, f"{base_name}_points_overlay.png")
         fig2.savefig(overlay_file, bbox_inches='tight', dpi=150)
-        plt.close(fig2)
 
         print(f"點座標和數值已儲存至 {output_file}")
         print(f"遮罩矩陣已儲存至 {mask_file}")
@@ -417,7 +426,7 @@ class PointSelector:
 if __name__ == "__main__":
     # 設置圖片路徑
     project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    image_path = os.path.join(project_root, 'data', 'DA2', 'rosemaling.png')
+    image_path = os.path.join(project_root, 'data', 'DA2', 'poney.png')
     
     # 創建並運行點選器
     selector = PointSelector(image_path)
