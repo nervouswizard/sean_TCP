@@ -288,35 +288,83 @@ class PointSelector:
         # 生成文件名 (使用原圖檔名加上_points.json)
         base_name = os.path.splitext(os.path.basename(self.image_path))[0]
         output_file = f"{base_name}_points.json"
-        
+        mid_val = 0.5 * (self.min_value + self.max_value)
+
         # 創建包含座標和數值的完整數據
         point_data = []
         for i, (x, y) in enumerate(self.points):
-            value = self.point_values[i] if i < len(self.point_values) else 0.5
+            value = self.point_values[i] if i < len(self.point_values) else mid_val
             point_data.append({
                 'position': (x, y),
                 'value': float(value)
             })
-        
+
         # 儲存點座標和數值到JSON檔案
         with open(output_file, 'w') as f:
             json.dump(point_data, f)
-        
+
         # 創建與圖片相同size的零矩陣
         mask = np.zeros(self.image.shape[:2], dtype=np.float32)
-        
+
         # 將選取的點座標設為對應滑桿的數值
         for i, (x, y) in enumerate(self.points):
             if 0 <= y < mask.shape[0] and 0 <= x < mask.shape[1]:
-                value = self.point_values[i] if i < len(self.point_values) else 0.5
+                value = self.point_values[i] if i < len(self.point_values) else mid_val
                 mask[y, x] = value
-                
+
         # 儲存矩陣
         mask_file = f"{base_name}_mask.npy"
         np.save(mask_file, mask)
-        
+
+        h, w = self.image.shape[:2]
+        xs = [p[0] for p in self.points]
+        ys = [p[1] for p in self.points]
+        vals = [self.point_values[i] if i < len(self.point_values) else mid_val
+                for i in range(len(self.points))]
+        fig_w = max(6, w / 100)
+        fig_h = max(4, h / 100)
+
+        # 儲存圖片1：全黑背景 + 熱力圖點位 + colorbar
+        fig1, ax1 = plt.subplots(figsize=(fig_w, fig_h))
+        ax1.set_facecolor('black')
+        fig1.patch.set_facecolor('black')
+        ax1.set_xlim(0, w)
+        ax1.set_ylim(h, 0)
+        ax1.set_aspect('equal')
+        ax1.axis('off')
+        if xs:
+            sc1 = ax1.scatter(xs, ys, c=vals, cmap='plasma',
+                              vmin=self.min_value, vmax=self.max_value,
+                              s=80, zorder=5, edgecolors='white', linewidths=0.5)
+            cbar1 = fig1.colorbar(sc1, ax=ax1, fraction=0.046, pad=0.04)
+            cbar1.set_label('深度值', color='white')
+            cbar1.ax.yaxis.set_tick_params(color='white')
+            plt.setp(cbar1.ax.yaxis.get_ticklabels(), color='white')
+            cbar1.outline.set_edgecolor('white')
+        black_file = f"{base_name}_points_black.png"
+        fig1.savefig(black_file, bbox_inches='tight', facecolor='black', dpi=150)
+        plt.close(fig1)
+
+        # 儲存圖片2：原始圖片 + 熱力圖點位 + colorbar
+        fig2, ax2 = plt.subplots(figsize=(fig_w, fig_h))
+        ax2.imshow(np.array(Image.open(self.image_path).convert('RGB')))
+        ax2.set_xlim(0, w)
+        ax2.set_ylim(h, 0)
+        ax2.axis('off')
+        if xs:
+            sc2 = ax2.scatter(xs, ys, c=vals, cmap='plasma',
+                              vmin=self.min_value, vmax=self.max_value,
+                              s=80, zorder=5, edgecolors='white', linewidths=0.5)
+            cbar2 = fig2.colorbar(sc2, ax=ax2, fraction=0.046, pad=0.04)
+            cbar2.set_label('深度值')
+        overlay_file = f"{base_name}_points_overlay.png"
+        fig2.savefig(overlay_file, bbox_inches='tight', dpi=150)
+        plt.close(fig2)
+
         print(f"點座標和數值已儲存至 {output_file}")
         print(f"遮罩矩陣已儲存至 {mask_file}")
+        print(f"黑底點位圖已儲存至 {black_file}")
+        print(f"疊加點位圖已儲存至 {overlay_file}")
         print("儲存的點詳細資訊:")
         for i, ((x, y), val) in enumerate(zip(self.points, self.point_values)):
             print(f"  點 {i+1}: 座標=({x}, {y}), 深度值={val:.3f}")
