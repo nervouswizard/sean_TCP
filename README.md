@@ -13,7 +13,7 @@
      │
      ▼
 【階段零】初始深度估算（觀察用）
-  projects/Marigold-DC（不帶稀疏引導，純單目深度估算）
+  Depth Anything V2（單次前向推論，輸出仿射不變深度圖）
      │  輸出: initial_depth.npy + 視覺化深度圖
      │
      ▼  ← 人工觀察：哪些區域的深度判斷是錯誤的？
@@ -45,11 +45,9 @@
 
 ### 階段零：初始深度估算（觀察用）
 
-在手動標注之前，先以**無引導**模式跑一次 Marigold，取得初始深度圖：
-
-```bash
-python -m marigold_dc --in-image painting.png --out-depth initial_depth.npy
-```
+在手動標注之前，先以 **Depth Anything V2** 取得初始深度圖，供人工觀察深度分布。
+DA-V2 為判別式模型（單次前向推論），速度遠快於擴散式方法，適合作為觀察用的快速預覽。
+推論完成後輸出 `initial_depth.npy`。
 
 用 `src/visualization/draw_npy.py` 視覺化輸出，觀察哪些區域深度有誤（例如國畫留白、皴法筆觸、墨色濃淡造成的誤判），作為下一步標注的依據。
 
@@ -181,7 +179,7 @@ git submodule update --remote projects/Uni3C
 **典型工作流程：**
 ```
 原始影像
-  → (Marigold-DC 初始推論)              # 無引導，觀察深度分布
+  → (Depth Anything V2 初始推論)         # 觀察深度分布，找出誤判區域
   → visualization/draw_npy.py           # 確認初始深度圖，找出誤判區域
   → depth_hints/point_selector.py       # 手動指定稀疏深度參考點 → *_points.json + *_mask.npy
   → visualization/visualize_points.py  # 確認點位標注是否正確
