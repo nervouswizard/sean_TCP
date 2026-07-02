@@ -7,7 +7,7 @@ REM -- Python from the ComfyUI conda env (has numpy / open3d / matplotlib) -----
 set "PYTHON=D:\anaconda3\envs\comfyui\python.exe"
 
 REM -- PLY file to preview ----------------------------------------------------
-set "PLY=D:\ncku\ComfyUI\output\pointcloud_0000.ply"
+set "PLY=D:\ncku\sean_TCP\data\point_cloud\human.ply"
 
 REM -- Options ----------------------------------------------------------------
 REM  COLOR_MODE : rgb  or  view_id
