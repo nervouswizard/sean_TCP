@@ -4,23 +4,23 @@ REM  Launcher for depth_to_pointcloud.py  --  edit the variables below
 REM ===========================================================================
 
 REM -- Python from the ComfyUI conda env (has numpy / pillow / open3d) --------
-set "PYTHON=D:\anaconda3\envs\comfyui\python.exe"
+set "PYTHON=C:\Users\sean\miniconda3\envs\pointcloud\python.exe"
 
 REM -- Input depth image ------------------------------------------------------
-set "DEPTH=D:\ncku\sean_TCP\data\DA2\human.png"
+set "DEPTH=%~dp0..\data\marigold-DC\human.jpg"
 
 REM -- Optional RGB image to colour the points (leave blank to skip) ----------
-set "RGB=D:\ncku\sean_TCP\data\input\human.png"
+set "RGB=%~dp0..\data\input\human.png"
 
 REM -- Output PLY -------------------------------------------------------------
-set "OUT=D:\ncku\sean_TCP\data\point_cloud\human_from_depth.ply"
+set "OUT=%~dp0..\data\point_cloud\human.ply"
 
 REM -- Options ----------------------------------------------------------------
 REM  DEPTH_MODE : inverse (bright=near, DA2/Marigold PNG) or linear (bright=far,
 REM               e.g. Marigold-DC .npy converted to an image where 0=near,1=far)
 set "DEPTH_MODE=inverse"
-set "ZNEAR=1.0"
-set "ZFAR=4.0"
+set "ZNEAR=0.8"
+set "ZFAR=1.4"
 set "FOV=60"
 REM  STRIDE : sample every Nth pixel (1 = full resolution)
 set "STRIDE=1"

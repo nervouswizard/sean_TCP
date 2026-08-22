@@ -183,6 +183,40 @@ def view_matplotlib(points, colors, point_size, bg):
     plt.show()
 
 
+def parse_aspect(spec):
+    """Target width/height ratio from a 'W:H' / 'WxH' string or an image path."""
+    import re
+
+    m = re.fullmatch(r"\s*(\d+(?:\.\d+)?)\s*[:xX]\s*(\d+(?:\.\d+)?)\s*", spec)
+    if m:
+        w, h = float(m.group(1)), float(m.group(2))
+        if h == 0:
+            raise ValueError(f"invalid aspect '{spec}': height must be non-zero")
+        return w / h
+    from PIL import Image  # spec is an image path -> use its pixel dimensions
+    with Image.open(spec) as im:
+        w, h = im.size
+    return w / h
+
+
+def rescale_xy_to_aspect(points, target_ratio):
+    """Non-uniformly scale X about the centroid so the cloud's bounding-box
+    width:height ratio equals target_ratio (= W/H). Y and Z are untouched."""
+    if target_ratio <= 0:
+        raise ValueError("target_ratio must be positive")
+    if len(points) == 0:
+        return points, 1.0
+    mins, maxs = points.min(0), points.max(0)
+    x_ext, y_ext = maxs[0] - mins[0], maxs[1] - mins[1]
+    if x_ext <= 0 or y_ext <= 0:
+        return points, 1.0
+    sx = target_ratio / (x_ext / y_ext)     # factor to apply to X
+    cx = 0.5 * (mins[0] + maxs[0])
+    out = points.copy()
+    out[:, 0] = (out[:, 0] - cx) * sx + cx
+    return out, sx
+
+
 def pick_backend(name):
     if name != "auto":
         return name
@@ -207,6 +241,10 @@ def main():
                     help="Random-subsample above this many points")
     ap.add_argument("--bg", default="0.1,0.1,0.1",
                     help="Background colour as R,G,B in 0..1")
+    ap.add_argument("--aspect", default=None,
+                    help="Rescale X so the cloud's width:height matches this. "
+                         "Accepts 'W:H', 'WxH', or an image path (uses its "
+                         "pixel dimensions). Y and Z are left unchanged.")
     args = ap.parse_args()
 
     points, colors, confidence, view_id = read_ply(args.file)
@@ -227,6 +265,11 @@ def main():
         points = points[sel]
         colors = colors[sel] if colors is not None else None
         print(f"[subsample] capped to {args.max_points:,} points")
+
+    if args.aspect:
+        ratio = parse_aspect(args.aspect)
+        points, sx = rescale_xy_to_aspect(points, ratio)
+        print(f"[aspect] rescaled X by {sx:.3f} to width:height = {ratio:.4f}")
 
     bg = [float(x) for x in args.bg.split(",")]
 
